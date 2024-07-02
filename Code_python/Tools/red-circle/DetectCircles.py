@@ -40,7 +40,69 @@ def detect_circles (image):
 
     # Save the coordinates of all the detected circles
     if circles is not None:
-        return circles
+        return circles[0]
     else:
-        return None
+        return [[-1, -1, -1]]
             
+def get_mean_height(circles): 
+    """
+    Calculate the mean height of the detected circles in the image
+
+    Parameters:
+    circles: Numpy array with the coordiantes of the detected circles.
+
+    Returns:
+    mean_height: Mean height of the fist two detected circles.
+    """
+
+    # Import the required libraries
+    import numpy as np
+
+    # If there are less than two circles detected, return -1
+    if len(circles) < 2:
+        return -1
+
+    # Calculate the mean height
+    mean_height = np.mean([circles[0][1], circles[1][1]])
+
+    return mean_height
+
+def filter_data(mean_heights):
+    """
+    Filter the mean heights of the platform in each frame
+
+    Parameters:
+    mean_heights: List with the mean heights of the platform in each frame
+
+    Returns:
+    filtered_heights: List with the filtered mean heights of the platform in each frame
+    """
+
+    # Import the required libraries
+    import numpy as np
+
+    # Filter the data
+    filtered_heights = []
+    for i in range(0, len(mean_heights) - 1):
+
+        if i == 604:
+            print('Hi')
+
+        # Deleting the -1 values
+        if mean_heights[i] == -1:
+            # Make the mean of the previous and the first value different from -1
+            for j in range(i, len(mean_heights) - 1):
+                if mean_heights[j] != -1:
+                    filtered_heights.append(np.mean([mean_heights[j], filtered_heights[i - 2]]))
+                    break
+
+        # Deleting the values that are too different from the two previous ones
+        elif i > 1 and\
+            abs(mean_heights[i] - filtered_heights[i - 1]) > 0.05*filtered_heights[i - 1] and \
+            abs(mean_heights[i] - filtered_heights[i - 2]) > 0.05*filtered_heights[i - 2]:
+            filtered_heights.append(np.mean([filtered_heights[i - 1], filtered_heights[i - 2]]))
+
+        else:
+            filtered_heights.append(mean_heights[i])
+
+    return filtered_heights
