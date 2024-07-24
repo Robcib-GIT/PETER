@@ -20,9 +20,9 @@ def complete_with_filter():
     currDir = os.path.dirname(os.path.abspath(__file__)) + "/"
 
     # Load video or image
-    file_name = "OneStep"
+    file_name = "time_length"
     extension = ".mp4"
-    video = "D:/Tesis/PETER/FirstTests/" + file_name + extension
+    video = "D:/Tesis/PETER/Bike/" + file_name + extension
     cap = cv2.VideoCapture(video)
 
     # Load all the frames of the video

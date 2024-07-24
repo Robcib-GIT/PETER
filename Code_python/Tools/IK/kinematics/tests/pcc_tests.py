@@ -7,6 +7,10 @@
 
 import numpy as np
 
+import os
+import sys
+from pathlib import Path
+sys.path.insert(0, Path(__file__).parents[2].__str__())
 import kinematics.pcc
 
 def main():
