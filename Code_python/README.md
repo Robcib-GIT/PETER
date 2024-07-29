@@ -21,9 +21,9 @@ This project includes a simulator of the PETER soft robot, which allows to contr
 ## Installation
 
 - Clone the project repository:
-
+```sh
    git clone -b mar/develop https://github.com/Robcib-GIT/PETER
-
+```
 ## Use
 
 1. Select number of modules.
