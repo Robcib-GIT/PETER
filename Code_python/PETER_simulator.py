@@ -11,7 +11,7 @@ side_length = 150.0  # Longitud del lado del triángulo equilátero en mm
 m = 31.0  # Pendiente altura-tiempo de hinchado (mm/ms)
 module_gap = 19.0  # Separación entre módulos en mm (de actuador a actuador)
 effector_dist = 5  # Distancia del efector final al último actuador en mm
-num_modules = 4  # Número de módulos 
+num_modules = 2  # Número de módulos 
 
 # Función para calcular la altura del actuador en función del tiempo de hinchado (en ms)
 def actuator_height(inflation_time):
