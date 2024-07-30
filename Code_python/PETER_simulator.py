@@ -1,3 +1,7 @@
+"""
+Simulador de PETER
+Mar Martín Díaz
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 import tkinter as tk
@@ -144,7 +148,7 @@ def setup_ui():
         slider.pack(side=tk.LEFT, fill=tk.X, expand=True)
         entry = tk.Entry(frame)
         entry.pack(side=tk.LEFT)
-        entry.bind("<Return>", lambda event, i=i: slider.set(entries[i].get()))
+        entry.bind("<Return>", lambda event, i=i: sliders[i].set(entries[i].get()))
         sliders.append(slider)
         entries.append(entry)
 
@@ -172,5 +176,4 @@ canvas.get_tk_widget().pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
 update()
 root.mainloop()
-
 
