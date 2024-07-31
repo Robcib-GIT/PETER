@@ -26,7 +26,7 @@ model = keras.Sequential([
 times = np.zeros((1, 3), dtype=int)
 positions = np.zeros((1, 2), dtype=float)
 
-with open(curr_dir + 'positions1_data.csv', newline='') as csvfile:
+with open(curr_dir + 'pos_time_dataset.csv', newline='') as csvfile:
     spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
     for row in spamreader:
         float_values = [float(x) for x in row]
