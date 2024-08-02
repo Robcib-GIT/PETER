@@ -17,6 +17,17 @@ module_gap = 19.0  # Separación entre módulos en mm (de actuador a actuador)
 effector_dist = 5  # Distancia del efector final al último actuador en mm
 num_modules = 2  # Número de módulos 
 
+
+# Archivo simulacion.csv
+# Columnas que debe tener el CSV
+columns = [f'Valve{module + 1}_{i}' for module in range(num_modules) for i in range(3)]
+columns += ['Final_Effector_X', 'Final_Effector_Y', 'Final_Effector_Z']
+
+# Verificar si el archivo existe, si no, crearlo con las columnas 
+if not os.path.isfile('simulacion.csv'):
+    df = pd.DataFrame(columns=columns)
+    df.to_csv('simulacion.csv', index=False)
+
 # Función para calcular la altura del actuador en función del tiempo de hinchado (en ms)
 def actuator_height(inflation_time):
     return initial_height + (m * inflation_time / 2000)
@@ -85,14 +96,14 @@ def update_plot(valve_times, num_modules):
     centroid = np.mean(last_top_vertices, axis=0)
 
     # Desplazar el centro del último triángulo en la dirección del vector normal
-    displaced_centroid = centroid + normal_vector * effector_dist
+    final_effector = centroid + normal_vector * effector_dist
 
     # Dibujar el punto en el centro del último triángulo y el punto del efector final
     ax.scatter(centroid[0], centroid[1], centroid[2], color='r', label='Centro del último triángulo')
     #ax.text(centroid[0], centroid[1], centroid[2], f'({centroid[0]:.2f}, {centroid[1]:.2f}, {centroid[2]:.2f})', color='red')
 
-    ax.scatter(displaced_centroid[0], displaced_centroid[1], displaced_centroid[2], color='g', label='Centro del efector final')
-    ax.text(displaced_centroid[0], displaced_centroid[1], displaced_centroid[2], f'({displaced_centroid[0]:.2f}, {displaced_centroid[1]:.2f}, {displaced_centroid[2]:.2f})', color='green')
+    ax.scatter(final_effector[0], final_effector[1], final_effector[2], color='g', label='Centro del efector final')
+    ax.text(final_effector[0], final_effector[1], final_effector[2], f'({final_effector[0]:.2f}, {final_effector[1]:.2f}, {final_effector[2]:.2f})', color='green')
 
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
@@ -105,7 +116,7 @@ def update_plot(valve_times, num_modules):
     canvas.draw()
 
     # Devolver las coordenadas del punto desplazado
-    return displaced_centroid
+    return final_effector
 
 # Función para actualizar el gráfico en función de los valores de los sliders
 def update(*args):
@@ -113,8 +124,8 @@ def update(*args):
     for module in range(num_modules):
         times = [sliders[module*3 + i].get() for i in range(3)]
         valve_times.append(times)
-    global last_displaced_centroid
-    last_displaced_centroid = update_plot(valve_times, num_modules)
+    global last_final_effector
+    last_final_effector = update_plot(valve_times, num_modules)
 
 # Función para guardar los datos en un archivo CSV
 def save_data():
@@ -125,18 +136,20 @@ def save_data():
 
     # Crear un DataFrame con los datos
     data = {}
+
     for module in range(num_modules):
         for i in range(3):
             data[f'Valve{module + 1}_{i}'] = [valve_times[module][i]]
-    data['Displaced_Centroid_X'] = [last_displaced_centroid[0]]
-    data['Displaced_Centroid_Y'] = [last_displaced_centroid[1]]
-    data['Displaced_Centroid_Z'] = [last_displaced_centroid[2]]
+            data['Final_Effector_X'] = [last_final_effector[0]]
+            data['Final_Effector_Y'] = [last_final_effector[1]]
+            data['Final_Effector_Z'] = [last_final_effector[2]]
     
     df = pd.DataFrame(data)
     
-    # Guardar el DataFrame en un archivo CSV 
+    # Guardar el DataFrame en el CSV 
     with open('simulacion.csv', mode='a', newline='') as file:
         df.to_csv(file, header=not os.path.isfile('simulacion.csv'), index=False)
+
 
 def setup_ui():
     for i in range(num_modules * 3):
