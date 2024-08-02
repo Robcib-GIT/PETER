@@ -78,7 +78,7 @@ The script PETER_trainning_NN.py trains a neural network to predict the actuatio
   - matplotlib
   - joblib
 
-  ## Use 
+## Use 
 
   1. Before running this script, ensure that the CSV file simulacion_random.csv exists in the same directory. This CSV file should contain the simulation data with columns for the final effector positions and the corresponding valve actuation times.
   2. Run the code.
