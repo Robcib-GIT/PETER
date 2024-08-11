@@ -9,14 +9,15 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import pandas as pd
 import os
 
+
 # CONSTANTES
 initial_height = 47.0  # Altura inicial de cada actuador en mm
 side_length = 150.0  # Longitud del lado del triángulo equilátero en mm
 m = 31.0  # Pendiente altura-tiempo de hinchado (mm/ms)
 module_gap = 19.0  # Separación entre módulos en mm (de actuador a actuador)
 effector_dist = 5  # Distancia del efector final al último actuador en mm
-num_modules = 2  # Número de módulos 
-
+base_height = 5 # Altura de la base del primer módulo en mm
+num_modules = 4  # Número de módulos 
 
 # Archivo simulacion.csv
 # Columnas que debe tener el CSV
@@ -53,8 +54,7 @@ def update_plot(valve_times, num_modules):
     global ax
     ax.clear()
 
-    current_z = 5  ###### Inicializar la altura en z
-    base_vertices = triangle_vertices(current_z, side_length)  # Base del primer módulo
+    base_vertices = triangle_vertices(base_height, side_length)  # Base del primer módulo
 
     for module in range(num_modules):
         # Alturas de cada actuador
