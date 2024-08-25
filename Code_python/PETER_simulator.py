@@ -17,7 +17,7 @@ m = 31.0  # Pendiente altura-tiempo de hinchado (mm/ms)
 module_gap = 19.0  # Separación entre módulos en mm (de actuador a actuador)
 effector_dist = 5  # Distancia del efector final al último actuador en mm
 base_height = 5 # Altura de la base del primer módulo en mm
-num_modules = 4  # Número de módulos 
+num_modules = 2  # Número de módulos 
 
 # Archivo simulacion.csv
 # Columnas que debe tener el CSV
@@ -101,7 +101,6 @@ def update_plot(valve_times, num_modules):
     # Dibujar el punto en el centro del último triángulo y el punto del efector final
     ax.scatter(centroid[0], centroid[1], centroid[2], color='r', label='Centro del último triángulo')
     #ax.text(centroid[0], centroid[1], centroid[2], f'({centroid[0]:.2f}, {centroid[1]:.2f}, {centroid[2]:.2f})', color='red')
-
     ax.scatter(final_effector[0], final_effector[1], final_effector[2], color='g', label='Centro del efector final')
     ax.text(final_effector[0], final_effector[1], final_effector[2], f'({final_effector[0]:.2f}, {final_effector[1]:.2f}, {final_effector[2]:.2f})', color='green')
 
