@@ -16,12 +16,16 @@ from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 import matplotlib.pyplot as plt
 import joblib
 
+# Número de módulos
+num_modules = 2
+
 # Cargar el archivo CSV
 data = pd.read_csv('simulacion_random.csv')
 
 # Separar las entradas (posicion del efector final) y salidas (tiempos de las válvulas)
 X = data[['Final_Effector_X', 'Final_Effector_Y', 'Final_Effector_Z']]
-y = data[['Valve1_0', 'Valve1_1', 'Valve1_2', 'Valve2_0', 'Valve2_1', 'Valve2_2']]
+valve_columns = [f'Valve{i+1}_{j}' for i in range(num_modules) for j in range(3)]
+y = data[valve_columns]
 
 # Asegurarse de que y está en el rango correcto
 y = y.clip(0, 2000)
@@ -43,7 +47,7 @@ model = Sequential([
     Dense(64, activation='gelu', kernel_regularizer=l2(0.01)),
     Dropout(0.3),
     Dense(32, activation='gelu', kernel_regularizer=l2(0.01)),
-    Dense(6)
+    Dense(num_modules*3)
 ])
 
 # Compilar el modelo con Nadam optimizer

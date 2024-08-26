@@ -13,7 +13,7 @@ m = 31.0  # Pendiente altura-tiempo de hinchado (mm/ms)
 module_gap = 19.0  # Separación entre módulos en mm (de actuador a actuador)
 effector_dist = 5  # Distancia del efector final al último actuador en mm
 base_height = 5 # Altura de la base del primer módulo en mm
-num_modules = 2  # Número de módulos 
+num_modules = 4  # Número de módulos 
 
 
 # Función para calcular la altura del actuador en función del tiempo de hinchado (en ms)

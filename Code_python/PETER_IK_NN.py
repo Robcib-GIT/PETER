@@ -15,6 +15,8 @@ import joblib
 model = tf.keras.models.load_model('modelo_entrenado_optimizado.keras')
 scaler = joblib.load('scaler.pkl')
 
+num_modules = 4 # Número de módulos
+
 # Función para hacer predicciones
 def make_prediction():
     try:
@@ -63,7 +65,6 @@ frame_output = tk.Frame(root)
 frame_output.pack(pady=10)
 
 valve_labels = []
-num_modules = 2  # Número de módulos
 
 for i in range(num_modules):
     for j in range(3):
