@@ -17,7 +17,7 @@ m = 31.0  # Pendiente altura-tiempo de hinchado (mm/ms)
 module_gap = 19.0  # Separación entre módulos en mm (de actuador a actuador)
 effector_dist = 5  # Distancia del efector final al último actuador en mm
 base_height = 5 # Altura de la base del primer módulo en mm
-num_modules = 4 # Número de módulos 
+num_modules = 2 # Número de módulos 
 
 # Archivo simulacion.csv
 # Columnas que debe tener el CSV
@@ -81,6 +81,9 @@ def update_plot(valve_times, num_modules):
             ax.plot([base_vertices[i, 0], top_vertices[i, 0]], 
                     [base_vertices[i, 1], top_vertices[i, 1]], 
                     [base_vertices[i, 2], top_vertices[i, 2]], 'g--')
+            
+            ax.text(top_vertices[i, 0], top_vertices[i, 1], top_vertices[i, 2], 
+                    f'Valve {module * 3 + i + 1}', color='m')
 
         # Dibujar el triángulo que forman los actuadores
         for i in range(3):
