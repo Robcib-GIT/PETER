@@ -15,7 +15,7 @@ import joblib
 model = tf.keras.models.load_model('modelo_entrenado_optimizado.keras')
 scaler = joblib.load('scaler.pkl')
 
-num_modules = 4 # Número de módulos
+num_modules = 2 # Número de módulos
 
 # Función para hacer predicciones
 def make_prediction():

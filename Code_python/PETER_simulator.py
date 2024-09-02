@@ -12,12 +12,12 @@ import os
 
 # CONSTANTES
 initial_height = 47.0  # Altura inicial de cada actuador en mm
-side_length = 150.0  # Longitud del lado del triángulo equilátero en mm
+side_length = 170.0  # Longitud del lado del triángulo equilátero en mm
 m = 31.0  # Pendiente altura-tiempo de hinchado (mm/ms)
-module_gap = 19.0  # Separación entre módulos en mm (de actuador a actuador)
-effector_dist = 5  # Distancia del efector final al último actuador en mm
-base_height = 5 # Altura de la base del primer módulo en mm
-num_modules = 4 # Número de módulos 
+module_gap = 17.0  # Separación entre módulos en mm (de actuador a actuador)
+effector_dist = 17.0  # Distancia del efector final al último actuador en mm
+base_height = 18.0 # Altura de la base del primer módulo en mm
+num_modules = 2 # Número de módulos 
 
 # Archivo simulacion.csv
 # Columnas que debe tener el CSV

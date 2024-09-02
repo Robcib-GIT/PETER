@@ -7,11 +7,12 @@ import pandas as pd
 
 # CONSTANTES
 initial_height = 47.0  # Altura inicial de cada actuador en mm
-side_length = 150.0  # Longitud del lado del triángulo equilátero en mm
+side_length = 170.0  # Longitud del lado del triángulo equilátero en mm
 m = 31.0  # Pendiente altura-tiempo de hinchado (mm/ms)
-module_gap = 19.0  # Separación entre módulos en mm (de actuador a actuador)
-effector_dist = 5  # Distancia del efector final al último actuador en mm
-num_modules = 2  # Número de módulos 
+module_gap = 17.0  # Separación entre módulos en mm (de actuador a actuador)
+effector_dist = 17.0  # Distancia del efector final al último actuador en mm
+base_height = 18.0 # Altura de la base del primer módulo en mm
+num_modules = 2 # Número de módulos 
 num_simulations = 10000  # Número de simulaciones
 
 # Función para calcular la altura del actuador en función del tiempo de hinchado (en ms)
@@ -36,8 +37,8 @@ def calculate_next_base(current_top, module_gap):
 
 # Función para realizar una simulación y devolver las coordenadas del centroide desplazado
 def simulate(valve_times):
-    current_z = 5  # Inicializar la altura en z
-    base_vertices = triangle_vertices(current_z, side_length)  # Base del primer módulo
+    
+    base_vertices = triangle_vertices(base_height, side_length)  # Base del primer módulo
 
     for module in range(num_modules):
         # Alturas de cada actuador
