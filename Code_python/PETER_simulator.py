@@ -81,6 +81,9 @@ def update_plot(valve_times, num_modules):
             ax.plot([base_vertices[i, 0], top_vertices[i, 0]], 
                     [base_vertices[i, 1], top_vertices[i, 1]], 
                     [base_vertices[i, 2], top_vertices[i, 2]], 'g--')
+            
+            ax.text(top_vertices[i, 0], top_vertices[i, 1], top_vertices[i, 2], 
+                    f'Valve {module * 3 + i + 1}', color='m')
 
         # Dibujar el triángulo que forman los actuadores
         for i in range(3):
