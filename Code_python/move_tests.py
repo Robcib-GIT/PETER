@@ -8,7 +8,7 @@ curr_dir = os.path.dirname(os.path.abspath(__file__)) + "/"
 
 def main():
 
-    p = PETER.PETER('COM6')
+    p = PETER.PETER('COM7')
 
     p.callibrate_imu()
 

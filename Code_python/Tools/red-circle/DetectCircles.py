@@ -5,12 +5,17 @@
     2024-05-31
 """
 
-def detect_circles (image):
+SHOW_EACH = False
+SHOW_FIRST = False
+
+def detect_circles (image, colors = ["red"], num_circles = 1e11):
     """
-    Detects all the red circles in an image using OpenCV
+    Detects all the circles of colour color in an image using OpenCV
 
     Parameters:
     image: numpy array containing the image to process
+    color: color to detect. Possible values: 'red', 'blue', 'yellow', 'green'
+    num_circles: maximum number of circles to detect. Default is 1e11
 
     Returns:
     circles: Numpy array with the coordiantes of the detected circles.
@@ -27,22 +32,63 @@ def detect_circles (image):
     # Convert to Lab color space, we only need to check one channel (a-channel) for red here
     captured_frame_lab = cv2.cvtColor(captured_frame_bgr, cv2.COLOR_BGR2Lab)
 
-    # Threshold the Lab image, keep only the red pixels
-    # Possible yellow threshold: [20, 110, 170][255, 140, 215]
-    # Possible blue threshold: [20, 115, 70][255, 145, 120]
-    captured_frame_lab_red = cv2.inRange(captured_frame_lab, np.array([20, 150, 150]), np.array([190, 255, 255]))
+    # Circles with all the colors
+    all_circles = []
 
-    # Second blur to reduce more noise, easier circle detection
-    captured_frame_lab_red = cv2.GaussianBlur(captured_frame_lab_red, (5, 5), 2, 2)
+    for color in colors:
+        # Threshold the Lab image, keep only the red pixels
+        # Possible yellow threshold: [20, 110, 170][255, 140, 215]
+        # Possible blue threshold: [20, 115, 70][255, 145, 120]
+        if color == "red":
+            captured_frame_lab_color = cv2.inRange(captured_frame_lab, np.array([20, 150, 150]), np.array([190, 255, 255]))
+        elif color == "blue":
+            captured_frame_lab_color = cv2.inRange(captured_frame_lab, np.array([20, 115, 70]), np.array([190, 145, 120]))
+        elif color == "yellow":
+            captured_frame_lab_color = cv2.inRange(captured_frame_lab, np.array([20, 110, 170]), np.array([255, 140, 215]))
+        elif color == "green":
+            captured_frame_lab_color = cv2.inRange(captured_frame_lab, np.array([20, 70, 115]), np.array([190, 120, 145]))
 
-    # Use the Hough transform to detect circles in the image
-    circles = cv2.HoughCircles(captured_frame_lab_red, cv2.HOUGH_GRADIENT, 1, captured_frame_lab_red.shape[0] / 8, param1=100, param2=18, minRadius=5, maxRadius=60)
+        # Second blur to reduce more noise, easier circle detection
+        captured_frame_lab_color = cv2.GaussianBlur(captured_frame_lab_color, (5, 5), 2, 2)
 
-    # Save the coordinates of all the detected circles
-    if circles is not None:
-        return circles[0]
-    else:
-        return [[-1, -1, -1]]
+        # Use the Hough transform to detect circles in the image
+        circles = cv2.HoughCircles(captured_frame_lab_color, cv2.HOUGH_GRADIENT, 1, captured_frame_lab_color.shape[0] / 8, param1=100, param2=18, minRadius=5, maxRadius=60)
+
+        # If SHOW_EACH is True, show the image with the detected circles
+        if SHOW_EACH:
+            if circles is not None:
+                circles = np.uint16(np.around(circles))
+                for i in circles[0, :]:
+                    # Draw the outer circle
+                    cv2.circle(captured_frame_bgr, (i[0], i[1]), i[2], (0, 255, 0), 2)
+                    # Draw the center of the circle
+                    cv2.circle(captured_frame_bgr, (i[0], i[1]), 2, (0, 0, 255), 3)
+                    print(f"Circle at ({i[0]}, {i[1]}) with radius {i[2]}")
+                cv2.imshow('Detected circles', captured_frame_bgr)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows
+
+        # Show the image with the first detected circle
+        if SHOW_FIRST:
+            if circles is not None:
+                circles = np.uint16(np.around(circles))
+                i = circles[0, 0]
+                # Draw the outer circle
+                cv2.circle(captured_frame_bgr, (i[0], i[1]), i[2], (0, 255, 0), 2)
+                # Draw the center of the circle
+                cv2.circle(captured_frame_bgr, (i[0], i[1]), 2, (0, 0, 255), 3)
+                cv2.imshow('Detected circles', captured_frame_bgr)
+                cv2.waitKey(0)
+                cv2.destroyAllWindows
+
+    
+        # Save the coordinates of all the detected circles
+        if circles is not None:
+            all_circles.append(circles[0][min(num_circles, len(circles[0])) - 1])
+        else:
+            all_circles.append(np.array([-1, -1, -1]))
+        
+    return all_circles
             
 def get_mean_height(circles): 
     """
