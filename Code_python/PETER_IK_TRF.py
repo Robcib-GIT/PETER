@@ -13,7 +13,7 @@ m = 31.0  # Pendiente altura-tiempo de hinchado (mm/ms)
 module_gap = 17.0  # Separación entre módulos en mm (de actuador a actuador)
 effector_dist = 17.0  # Distancia del efector final al último actuador en mm
 base_height = 18.0 # Altura de la base del primer módulo en mm
-num_modules = 2 # Número de módulos 
+num_modules = 1 # Número de módulos 
 
 
 # Función para calcular la altura del actuador en función del tiempo de hinchado (en ms)
@@ -91,6 +91,10 @@ def on_calculate_button_clicked():
     target = np.array([target_x, target_y, target_z])
     
     valve_times = IK_TRF(target)
+
+    real_pos = calculate_effector_position(valve_times)
+    real_pos = np.round(real_pos, 2)
+    real_results.config(text=f"x={real_pos[0]}, y={real_pos[1]}, z={real_pos[2]}")
     
     print("Valve times:", valve_times)  
     
@@ -135,6 +139,12 @@ for i in range(num_modules * 3):
     valve_entry = tk.Entry(root)
     valve_entry.grid(row=i+5, column=1)
     valve_entries.append(valve_entry)
+
+# Resultados reales
+real_label = tk.Label(root, text="Reached:")
+real_label.grid(row = num_modules * 3 + 5, column = 0)
+real_results = tk.Label(root, text="x=0, y=0, z=0")
+real_results.grid(row = num_modules * 3 + 5, column = 1)
 
 # Ejecutar la interfaz gráfica
 root.mainloop()
