@@ -21,7 +21,7 @@ def read_and_detect():
     currDir = os.path.dirname(os.path.abspath(__file__)) + "/"
 
     # Load video or image
-    file_name = "video2"
+    file_name = "video3"
     extension = ".mp4"
     video = "C:/Users/jorge/OneDrive - Universidad Politécnica de Madrid/Shares/Doctorado/TFM Ivonne/Video/" + file_name + extension
     cap = cv2.VideoCapture(video)
