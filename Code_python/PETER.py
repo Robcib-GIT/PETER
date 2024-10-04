@@ -11,7 +11,7 @@ curr_dir = os.path.dirname(os.path.abspath(__file__)) + "/"
 # For returning the position, times, and number of iterations
 MovingStats = collections.namedtuple('MvoingStats', ['pos', 'times', 'it', 'interm_pos'])
 
-# Classe PAUL pour contrôler les valves
+# Classe PETER pour contrôler les valves
 class PETER:
     def __init__(self, port, baudrate=115200, deflating_ratio=1.7, real_mode=True):
         self.serial_device = serial.Serial(port, baudrate, timeout=1)
