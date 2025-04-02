@@ -1,10 +1,5 @@
-/*
-  Progam constants, type definitions...
-
-  Jorge F. García-Samartín
-  www.gsamartin.es
-  2024-11-18
-*/
+//En este fichero se declararan todas las constantes del programa, definiciones de tipos
+// etc.
 
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
@@ -21,22 +16,17 @@
 #include "Config.h"
 #include "SerialCommunication.h"
 
-#define NUM_SENSORES 1
-#define NUM_VALVULAS 9
-#define P_V_RATIO 5
-
-
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define SCREEN_ADDRESS 0x3C // OLED I2C address
 #define OLED_RESET -1 // Reset pin # (or -1 if sharing Arduino reset pin)
 
-enum modes
+enum modos
 {
     S_NORMAL,
     S_ERROR_STOPAUTO,
-    S_ERROR_EMERGENCY_STOP
+    S_ERROR_PARADA_EMERGENCIA
 };
 
 const uint8_t LED_MAXV_R = 180;

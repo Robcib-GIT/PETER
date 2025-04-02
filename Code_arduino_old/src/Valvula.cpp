@@ -73,6 +73,7 @@ void Valvula::fill_millis_private(uint32_t time)
 void Valvula::emptyng_millis_private(uint32_t time)
 {
     if(state == S_EMERGENCY_STOP) return;
+
     this->alAire();
     timing_active = true;
     first_time = millis();
@@ -87,6 +88,7 @@ void Valvula::callback()
 {
     if(timing_active)
     {
+        
         if(millis() - first_time > final_time)
         {
             this -> Cerrada();

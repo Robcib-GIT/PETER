@@ -9,7 +9,6 @@
 namespace Robot { 
 
     const uint8_t __NUM_VALVULAS__ = 9;
-    const uint8_t __NUM_SENSORES__ = 1;
 
     struct v_pinout {
       uint8_t pin_32;

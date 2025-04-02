@@ -10,7 +10,7 @@ const float io_multiplier = 1.2;
 
 // Maximos ms que debe estar abierta la valvula
 //const int MAX_PRESSURE = 2500;
-const uint16_t MAX_PRESSURE = 65535;
+const int MAX_PRESSURE = 1e6;
 
 // Posibles estados de la valvula
 enum mode

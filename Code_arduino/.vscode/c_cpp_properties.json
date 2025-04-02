@@ -10,6 +10,7 @@
             "includePath": [
                 "C:/ProgDos/Repositorios/Robcib/PETER/Code_arduino/include",
                 "C:/ProgDos/Repositorios/Robcib/PETER/Code_arduino/src",
+                "C:/ProgDos/Repositorios/Robcib/PETER/Code_arduino/.pio/libdeps/uno/Adafruit INA3221 Library",
                 "C:/ProgDos/Repositorios/Robcib/PETER/Code_arduino/.pio/libdeps/uno/Adafruit BNO055",
                 "C:/ProgDos/Repositorios/Robcib/PETER/Code_arduino/.pio/libdeps/uno/Adafruit BNO055/utility",
                 "C:/ProgDos/Repositorios/Robcib/PETER/Code_arduino/.pio/libdeps/uno/Adafruit BusIO",
@@ -29,6 +30,7 @@
                 "path": [
                     "C:/ProgDos/Repositorios/Robcib/PETER/Code_arduino/include",
                     "C:/ProgDos/Repositorios/Robcib/PETER/Code_arduino/src",
+                    "C:/ProgDos/Repositorios/Robcib/PETER/Code_arduino/.pio/libdeps/uno/Adafruit INA3221 Library",
                     "C:/ProgDos/Repositorios/Robcib/PETER/Code_arduino/.pio/libdeps/uno/Adafruit BNO055",
                     "C:/ProgDos/Repositorios/Robcib/PETER/Code_arduino/.pio/libdeps/uno/Adafruit BNO055/utility",
                     "C:/ProgDos/Repositorios/Robcib/PETER/Code_arduino/.pio/libdeps/uno/Adafruit BusIO",
@@ -45,7 +47,7 @@
                 ]
             },
             "defines": [
-                "PLATFORMIO=60115",
+                "PLATFORMIO=60118",
                 "ARDUINO_AVR_MEGA2560",
                 "F_CPU=16000000L",
                 "ARDUINO_ARCH_AVR",
