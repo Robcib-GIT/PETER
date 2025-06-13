@@ -1,9 +1,20 @@
+"""
+    Class PETER for controlling valves and reading sensor data
+    Jorge F. García-Samartín
+    www.gsamartin.es
+    Mathias Charles
+    v1: 2024-06-20
+    v2: 2025-06-10 -> New methods for handling additional sensors
+"""
+
 import os
 import time
 import serial
 import collections
 import numpy as np
 from tensorflow import keras
+
+import SetupParams
 
 # Get current working directory
 curr_dir = os.path.dirname(os.path.abspath(__file__)) + "/"
@@ -13,7 +24,7 @@ MovingStats = collections.namedtuple('MovingStats', ['pos', 'times', 'it', 'inte
 
 # Classe PETER pour contrôler les valves
 class PETER:
-    def __init__(self, port='/dev/ttyUSB0', baudrate=115200, deflating_ratio=1.7, real_mode=True):
+    def __init__(self, port=SetupParams.serial_port, baudrate=SetupParams.baudrate, deflating_ratio=1.7, real_mode=True):
         self.serial_device = serial.Serial(port, baudrate, timeout=1)
         self.deflating_ratio = deflating_ratio
         self.real_mode = real_mode
@@ -21,7 +32,12 @@ class PETER:
         # Load models
         self.pos2time = keras.models.load_model(curr_dir + 'pos2time_model.keras')
         #self.time2pos = keras.models.load_model(curr_dir + 'time2pos_model.keras')
-    
+
+        # Sleep 2 seconds and read initial position
+        time.sleep(2)
+        x, y, z, h = self.read_sensors()
+        print(f"Setup done. Initial position : x={x}, y={y}, z={z}, h={h}")
+
     def close(self):
         self.serial_device.close()
 
@@ -34,6 +50,33 @@ class PETER:
             self.serial_device.write(command.encode())
             time.sleep(0.1)  # Petite pause pour s'assurer que la commande est bien envoyée
 
+    # Read daa from the IMU and the TOF
+    def read_sensors(self):
+        if self.real_mode:
+            self.serial_device.write(b'M') # Envoyer la commande 'M' pour lire les données
+            data = self.serial_device.readline().decode('utf-8').strip()  # Lire la ligne envoyée par l'Arduino
+            
+            # If valid data has been received
+            if data.startswith("S"):
+                
+                data = data[1:].strip()
+                
+                # Separte teh data
+                try:
+                    x, y, z, h = map(float, data.split(","))
+                    return x, y, z, h
+                except ValueError:
+                    if SetupParams.verbose:
+                        print(f"Erreur de conversion des données reçues: {data}")
+                return None, None, None, None
+            
+            else:
+                if SetupParams.verbose:
+                    print(f"Erreur de format des données reçues: {data}")
+                return None, None, None, None
+        else:
+            return 0, 0, 0, 0  # Valeurs par défaut si en mode simulation
+
     # Fonction pour lire les données IMU
     def read_imu_data(self):
         self.serial_device.write(b'M')  # Envoyer la commande 'M' pour lire les données
@@ -43,13 +86,15 @@ class PETER:
             x, y, z = map(float, data.split(","))
             return x, y, z
         except ValueError:
-            print(f"Erreur de conversion des données reçues: {data}")
+            if SetupParams.verbose:
+                print(f"Erreur de conversion des données reçues: {data}")
             return None, None, None
         
     # Callibrate the IMU
     def callibrate_imu(self):
         # Lire la position initiale
-        print("Lecture de la position initiale...")
+        if SetupParams.verbose:
+            print("Lecture de la position initiale...")
         initial_x, initial_y, initial_z = self.read_imu_data()
 
         if initial_x is not None and initial_y is not None and initial_z is not None:
@@ -60,11 +105,13 @@ class PETER:
             self.x0 = initial_x_transformed
             self.y0 = initial_y_transformed
             self.z0 = initial_z_transformed
-            print(f"Position initiale définie à : x={initial_x_transformed}, y={initial_y_transformed}, z={initial_z_transformed}")
+            if SetupParams.verbose:
+                print(f"Position initiale définie à : x={initial_x_transformed}, y={initial_y_transformed}, z={initial_z_transformed}")
         else:
-            print("Erreur de lecture de la position initiale. Veuillez vérifier les connexions.")
+            if SetupParams.verbose:
+                print("Erreur de lecture de la position initiale. Veuillez vérifier les connexions.")
             exit()
-        
+
     # Transformer les données IMU
     def transform_imu_data(self, x, y, z):
         new_x = -z  # Z devient -X
@@ -104,13 +151,15 @@ class PETER:
             relative_y = new_y - self.y0
             relative_z = new_z - self.z0
 
-            print(f"Position relative après manipulation de la valve {valve} : x={relative_x:.2f}, y={relative_y:.2f}, z={relative_z:.2f}")
+            if SetupParams.verbose:
+                print(f"Position relative après manipulation de la valve {valve} : x={relative_x:.2f}, y={relative_y:.2f}, z={relative_z:.2f}")
 
             return relative_x, relative_y, relative_z
         else:
-            print(f"Impossible de lire les données IMU après manipulation de la valve {valve}.")
+            if SetupParams.verbose:
+                print(f"Impossible de lire les données IMU après manipulation de la valve {valve}.")
             return None, None, None
-        
+
     # Move to point
     def move (self, x0, y0):
 
@@ -167,7 +216,8 @@ class PETER:
             err[1] = time1 - t1_obs
             err[2] = time2 - t2_obs
 
-            print(f"err0={err[0]:.2f}, err1={err[1]:.2f}, err2={err[2]:.2f}")
+            if SetupParams.verbose:
+                print(f"err0={err[0]:.2f}, err1={err[1]:.2f}, err2={err[2]:.2f}")
 
         x, y, _ = self.read_and_transform_imu_data()
         times = self.pos2time.predict(np.array([[x, y]]))[0]
@@ -221,6 +271,7 @@ class PETER:
             err[0] = x0 - x
             err[1] = y0 - y
 
-            print(f"err0={err[0]:.2f}, err1={err[1]:.2f},")
+            if SetupParams.verbose:
+                print(f"err0={err[0]:.2f}, err1={err[1]:.2f},")
 
         return MovingStats(pos = [x,y], times = times, it = it)
