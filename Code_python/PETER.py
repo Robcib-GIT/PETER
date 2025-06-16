@@ -15,6 +15,8 @@ import numpy as np
 from tensorflow import keras
 
 import SetupParams
+# Setup parameters
+params = SetupParams.SetupParams()
 
 # Get current working directory
 curr_dir = os.path.dirname(os.path.abspath(__file__)) + "/"
@@ -24,7 +26,7 @@ MovingStats = collections.namedtuple('MovingStats', ['pos', 'times', 'it', 'inte
 
 # Classe PETER pour contrôler les valves
 class PETER:
-    def __init__(self, port=SetupParams.serial_port, baudrate=SetupParams.baudrate, deflating_ratio=1.7, real_mode=True):
+    def __init__(self, port=params.serial_port, baudrate=params.baudrate, deflating_ratio=1.7, real_mode=True):
         self.serial_device = serial.Serial(port, baudrate, timeout=1)
         self.deflating_ratio = deflating_ratio
         self.real_mode = real_mode
@@ -47,13 +49,15 @@ class PETER:
                 command = f"f,{valv},{millis}\n"  # Commande pour gonfler
             else:
                 command = f"e,{valv},{-millis}\n"  # Commande pour dégonfler
+            time.sleep(0.01)  # Petite pause pour s'assurer que la commande est bien envoyée
             self.serial_device.write(command.encode())
-            time.sleep(0.1)  # Petite pause pour s'assurer que la commande est bien envoyée
+            #time.sleep(0.1)  # Petite pause pour s'assurer que la commande est bien envoyée
 
     # Read daa from the IMU and the TOF
     def read_sensors(self):
         if self.real_mode:
             self.serial_device.write(b'M') # Envoyer la commande 'M' pour lire les données
+            #time.sleep(0.1)  # Petite pause pour s'assurer que la commande est bien envoyée
             data = self.serial_device.readline().decode('utf-8').strip()  # Lire la ligne envoyée par l'Arduino
             
             # If valid data has been received
@@ -61,17 +65,17 @@ class PETER:
                 
                 data = data[1:].strip()
                 
-                # Separte teh data
+                # Separte the data
                 try:
                     x, y, z, h = map(float, data.split(","))
                     return x, y, z, h
                 except ValueError:
-                    if SetupParams.verbose:
+                    if params.verbose:
                         print(f"Erreur de conversion des données reçues: {data}")
                 return None, None, None, None
             
             else:
-                if SetupParams.verbose:
+                if params.verbose:
                     print(f"Erreur de format des données reçues: {data}")
                 return None, None, None, None
         else:
@@ -86,14 +90,14 @@ class PETER:
             x, y, z = map(float, data.split(","))
             return x, y, z
         except ValueError:
-            if SetupParams.verbose:
+            if params.verbose:
                 print(f"Erreur de conversion des données reçues: {data}")
             return None, None, None
         
     # Callibrate the IMU
     def callibrate_imu(self):
         # Lire la position initiale
-        if SetupParams.verbose:
+        if params.verbose:
             print("Lecture de la position initiale...")
         initial_x, initial_y, initial_z = self.read_imu_data()
 
@@ -105,10 +109,10 @@ class PETER:
             self.x0 = initial_x_transformed
             self.y0 = initial_y_transformed
             self.z0 = initial_z_transformed
-            if SetupParams.verbose:
+            if params.verbose:
                 print(f"Position initiale définie à : x={initial_x_transformed}, y={initial_y_transformed}, z={initial_z_transformed}")
         else:
-            if SetupParams.verbose:
+            if params.verbose:
                 print("Erreur de lecture de la position initiale. Veuillez vérifier les connexions.")
             exit()
 
@@ -151,12 +155,12 @@ class PETER:
             relative_y = new_y - self.y0
             relative_z = new_z - self.z0
 
-            if SetupParams.verbose:
+            if params.verbose:
                 print(f"Position relative après manipulation de la valve {valve} : x={relative_x:.2f}, y={relative_y:.2f}, z={relative_z:.2f}")
 
             return relative_x, relative_y, relative_z
         else:
-            if SetupParams.verbose:
+            if params.verbose:
                 print(f"Impossible de lire les données IMU après manipulation de la valve {valve}.")
             return None, None, None
 
@@ -216,7 +220,7 @@ class PETER:
             err[1] = time1 - t1_obs
             err[2] = time2 - t2_obs
 
-            if SetupParams.verbose:
+            if params.verbose:
                 print(f"err0={err[0]:.2f}, err1={err[1]:.2f}, err2={err[2]:.2f}")
 
         x, y, _ = self.read_and_transform_imu_data()
@@ -271,7 +275,7 @@ class PETER:
             err[0] = x0 - x
             err[1] = y0 - y
 
-            if SetupParams.verbose:
+            if params.verbose:
                 print(f"err0={err[0]:.2f}, err1={err[1]:.2f},")
 
         return MovingStats(pos = [x,y], times = times, it = it)

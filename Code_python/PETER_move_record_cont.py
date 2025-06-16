@@ -15,13 +15,15 @@ curr_dir = os.path.dirname(os.path.abspath(__file__)) + "/"
 
 import SetupParams
 
+params = SetupParams.SetupParams()
+
 def main():
 
     # Setup values
     max_time = 1500  # Maximum time to record in milliseconds
-    times_valves = 1000*[1, 1, 1] # Inflation time for each valve in milliseconds
+    times_valves = [200, 1000, 1000] # Inflation time for each valve in milliseconds
     max_time = max(times_valves)  # Maximum time of inflation
-    margin_times = [500, 500] # Extra time of measurement before and after inflation in milliseconds
+    margin_times = [500, 2000] # Extra time of measurement before and after inflation in milliseconds
     max_time += sum(margin_times)  # Total time to record
 
     # Create PETER instance
@@ -46,12 +48,12 @@ def main():
 
         # Print the position and store it
         t1 = time.time()
-        SetupParams.print(f"Position: x={x:.2f}, y={y:.2f}, z={z:.2f}, h={h:.2f}")
+        params.print(f"Position: x={x:.2f}, y={y:.2f}, z={z:.2f}, h={h:.2f}")
         peter.interm_pos.append([t1, x, y, z, h])
         data_read = False
 
     # Inflate valves and record positions continuously
-    SetupParams.print_debug("Inflating valves...")
+    params.print_debug("Inflating valves...")
     peter.write_one_valve_millis(1, times_valves[0])
     peter.write_one_valve_millis(2, times_valves[1])
     peter.write_one_valve_millis(3, times_valves[2])
@@ -67,19 +69,26 @@ def main():
 
         # Print the position and store it
         t1 = time.time()
-        SetupParams.print(f"Position: x={x:.2f}, y={y:.2f}, z={z:.2f}, h={h:.2f}")
+        params.print(f"Position: x={x:.2f}, y={y:.2f}, z={z:.2f}, h={h:.2f}")
         peter.interm_pos.append([t1, x, y, z, h])
         data_read = False
 
-    SetupParams.print(f"Total recording time: {total_time} ms") 
-    SetupParams.print("Recording complete.")
+    params.print(f"Total recording time: {total_time} ms") 
+    params.print("Recording complete.")
+
+    # Deflate valves
+    params.print_debug("Deflating valves...")
+    peter.write_one_valve_millis(1, -3000)
+    peter.write_one_valve_millis(2, -3000)
+    peter.write_one_valve_millis(3, -3000)
 
     # Save the recorded positions
     filename = datetime.now().strftime("%Y-%m-%d-%H-%M-%S-peter_positions.csv")
-    SetupParams.print(f"Saving results to {filename}...")
+    params.print(f"Saving results to {filename}...")
     total_time = int((t1 - t0) * 1000)  # Total time in milliseconds
     with open(curr_dir + "results/dynamics/" + filename, "w") as f:
         f.write(f"Total recording time: {total_time} ms\n")
+        f.write(f"Valve inflation times (ms): {times_valves}\n")
         f.write("time, x, y, z, h\n")
         for pos in peter.interm_pos:
             f.write(f"{pos[0]}, {pos[1]}, {pos[2]}, {pos[3]}, {pos[4]}\n")
