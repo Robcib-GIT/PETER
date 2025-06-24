@@ -43,6 +43,7 @@ void setup() {
 
   // Sensor initialization  
   misSensores[0] = new SensorBNO055();
+  misSensores[1] = new SensorVL53L0X();
 
   for (uint8_t i = 0; i < NUM_SENSORES; i++) {
     misSensores[i]->begin();
@@ -103,14 +104,20 @@ void loop() {
           x = Serial.parseInt();
           misValvulas[num_valv]->emptyng_millis((uint16_t)x);
           break;
+        
+        case 'c':
+        num_valv = Serial.parseInt();
+        misValvulas[num_valv]->Cerrada();
+        break;
 
         // Measure value of the sensors
         case 'M':
           if (real_robot) {
+            Serial.print("S ");
             for (uint8_t i = 0; i < NUM_SENSORES; i++) {
-              misSensores[i]->measure();
-              Serial.println(" ");
+              misSensores[i]->measure(); 
             }
+            
           } else {
             for (uint8_t i = 0; i < NUM_VALVULAS; i++) {
                 int p = misValvulas[i]->get_actual_pressure();

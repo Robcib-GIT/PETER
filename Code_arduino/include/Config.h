@@ -21,7 +21,7 @@
 #include "Config.h"
 #include "SerialCommunication.h"
 
-#define NUM_SENSORES 1
+#define NUM_SENSORES 2
 #define NUM_VALVULAS 9
 #define P_V_RATIO 5
 

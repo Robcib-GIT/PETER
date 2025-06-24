@@ -28,7 +28,7 @@ SensorBNO055::SensorBNO055() : Sensor() {
 // Method to initialize the BNO055 sensor
 void SensorBNO055::begin() {
     // Code to initialize the BNO055 sensor
-    if(!bno.begin()) {
+    if (!bno.begin()) {
         /* There was a problem detecting the BNO055 ... check your connections */
         //Serial.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
         //while(1);
@@ -45,10 +45,11 @@ void SensorBNO055::measure() {
     Serial.print(orientationData.orientation.y);
     Serial.print(",");
     Serial.print(orientationData.orientation.z);
+    Serial.print(",");
 }
 
 /********************************************************
-    Sensor INU3221 class
+    Sensor INA3221 class
 ********************************************************/
 // Constructor for SensorINA3221 class
 SensorINA3221::SensorINA3221(uint8_t channel) {
@@ -66,3 +67,32 @@ void SensorINA3221::measure() {
     float busVoltage = ina3221.getBusVoltage(this->channel); // Example: reading voltage from channel 1
     Serial.print(busVoltage);
 }
+
+/********************************************************
+    Sensor VL53L0X class
+********************************************************/
+// Constructor for SensorVL53L0X class
+SensorVL53L0X::SensorVL53L0X() : Sensor() {
+    // Initialization code specific to VL53L0X
+}
+
+// Method to initialize the VL53L0X sensor
+void SensorVL53L0X::begin() {
+    if (!lox.begin()) {
+        /* There was a problem detecting the VL53L0X ... check your connections */
+        //Serial.println("Error en la conexión con el TOF");
+        //while (1);
+    }
+}
+
+// Method to read data from the VL53L0X sensor
+void SensorVL53L0X::measure() {
+    VL53L0X_RangingMeasurementData_t measure;
+    lox.rangingTest(&measure, false); // Perform the measurement
+      
+
+
+        Serial.println(measure.RangeMilliMeter);
+
+}
+
