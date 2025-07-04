@@ -1,0 +1,145 @@
+clear; clc; close all;
+
+% Eğer daha önceden açık bir seri port objesi varsa temizle
+if exist('ser','var')
+    try
+        clear ser
+    catch
+    end
+end
+
+com_port = "COM7";
+baud = 115200;
+ser = serialport(com_port, baud);
+pause(2);
+
+Kp = 50;   % select between 10-60
+max_iter = 30;
+err_h_tol = 0.5;
+err_pos_norm_tol = 0.7;
+
+desired_x = 0;
+desired_y = 0;
+desired_h = 73;
+
+
+L = 170;
+
+% Safety
+write_one_valve_millis(ser, 1, -5000);
+write_one_valve_millis(ser, 2, -5000);
+write_one_valve_millis(ser, 3, -5000);
+disp("Deflating valves...");
+pause(5);
+
+try
+    disp('Reading initial IMU & TOF...');
+    [~, pitch0, roll0, h0] = read_sensors(ser, true);
+
+    measured_pitch = pitch0;
+    measured_roll  = roll0;
+    measured_h     = h0;
+
+    [desired_pitch, desired_roll, desired_hh] = xyh_to_prh(desired_x, desired_y, desired_h);
+
+    [hA_des, hB_des, hC_des] = prh_to_leg_heights(desired_pitch, desired_roll, desired_hh);
+    
+    % Limit check
+    if any([hA_des, hB_des, hC_des] < 56.3) || any([hA_des, hB_des, hC_des] > 75)
+        disp('PETER is not able to do that');
+        if exist('ser','var')
+            try
+                clear ser
+            catch
+            end
+        end
+        return
+    end
+  
+    % Initial triangle
+    [A0, B0, C0] = prh_to_triangle_vertices(pitch0, roll0, h0, L);
+
+    
+    figure(101); clf; hold on; grid on; axis equal;
+    xlabel('X (mm)'); ylabel('Y (mm)'); zlabel('H (mm)');
+    title('PETER Platformu Gerçek Zamanlı Üçgen Takibi');
+    view(3);
+
+    for k = 1:max_iter
+        [hA_meas, hB_meas, hC_meas] = prh_to_leg_heights(measured_pitch, measured_roll, measured_h);
+
+        err_A = hA_des - hA_meas;
+        err_B = hB_des - hB_meas;
+        err_C = hC_des - hC_meas;
+
+        tA = Kp * err_A;
+        tB = Kp * err_B;
+        tC = Kp * err_C;
+
+        % VERY IMPORTANT
+        % 1-C 3-B 2-A !!!!!
+        write_one_valve_millis(ser, 1, tC);
+        write_one_valve_millis(ser, 2, tA);
+        write_one_valve_millis(ser, 3, tB);
+        pause_duration = max(0.2,tA,tB,tC);
+        pause(pause_duration);
+
+        [~, pitch_new, roll_new, h_new] = read_sensors_filtered(ser, true);
+        measured_pitch = pitch_new;
+        measured_roll  = roll_new;
+        measured_h     = h_new;
+
+        [x_c, y_c, h_c] = prh_to_xyh(measured_pitch, measured_roll, measured_h);
+
+        pos_error = [desired_x - x_c, desired_y - y_c, desired_h - h_c];
+        pos_norm = norm(pos_error(1:2));
+
+        [hA_meas, hB_meas, hC_meas] = prh_to_leg_heights(measured_pitch, measured_roll, measured_h);
+
+        [A, B, C] = prh_to_triangle_vertices(measured_pitch, measured_roll, measured_h, L);
+
+        cla;
+        fill3([A0(1) B0(1) C0(1) A0(1)], [A0(2) B0(2) C0(2) A0(2)], [A0(3) B0(3) C0(3) A0(3)], ...
+            'b', 'FaceAlpha', 0.15, 'EdgeColor', 'b', 'LineWidth', 1.5, 'DisplayName', 'Initial Triangle');
+        fill3([A(1) B(1) C(1) A(1)], [A(2) B(2) C(2) A(2)], [A(3) B(3) C(3) A(3)], ...
+            'r', 'FaceAlpha', 0.2, 'EdgeColor', 'r', 'LineWidth', 2, 'DisplayName', 'Current Triangle');
+        
+        
+        center0 = mean([A0;B0;C0],1);
+        plot3(center0(1), center0(2), center0(3), 'bo', 'MarkerFaceColor', 'b', 'MarkerSize', 10);
+        center = mean([A;B;C],1);
+        plot3(center(1), center(2), center(3), 'ro', 'MarkerFaceColor', 'r', 'MarkerSize', 10);
+
+       
+        legend({'Initial Triangle', 'Current Triangle'}, 'Location', 'best');
+        drawnow;
+
+        % debug print
+        fprintf('\n[Step %d]\n', k);
+        fprintf('Valve times (ms):       [%.2f %.2f %.2f]\n', tA, tB, tC);
+        fprintf('Desired Leg Heights:    [%.2f %.2f %.2f]\n', hA_des, hB_des, hC_des);
+        fprintf('Current Leg Heights:    [%.2f %.2f %.2f]\n', hA_meas, hB_meas, hC_meas);
+        fprintf('Desired PRH:            [%.2f %.2f %.2f]\n', desired_pitch, desired_roll, desired_h);
+        fprintf('Current PRH:            [%.2f %.2f %.2f]\n', measured_pitch, measured_roll, measured_h);
+        fprintf('Current Position:       [%.2f %.2f %.2f]\n', x_c, y_c, h_c);
+        fprintf('Position error:         [%.2f %.2f] (norm=%.2f)\n', pos_error(1), pos_error(2), pos_norm);
+        fprintf('H error: [%.2f]\n', pos_error(3));
+
+        if abs(pos_norm) < err_pos_norm_tol && abs(pos_error(3)) < err_h_tol
+            disp('All leg errors below threshold. Converged.');
+            break
+        end
+    end
+catch ME
+    disp(getReport(ME));
+end
+
+if exist('ser','var')
+    try
+        clear ser
+    catch
+    end
+end
+
+
+
