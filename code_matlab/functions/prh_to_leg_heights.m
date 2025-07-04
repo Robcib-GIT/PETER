@@ -11,14 +11,13 @@ function [hA, hB, hC] = prh_to_leg_heights(pitch_deg, roll_deg, h_new)
     L = 170;
     h_center = 60;
     
-    % Initial triangle (centered at origin)
+    % Initial triangle
     h_tri = sqrt(3)/2 * L;
     A0 = [-L/2, -h_tri/3, h_center];
     B0 = [ L/2, -h_tri/3, h_center];
     C0 = [   0 , 2*h_tri/3, h_center];
     center0 = mean([A0; B0; C0], 1);
 
-    % Convert input angles to radians
     pitch = deg2rad(pitch_deg);
     roll  = deg2rad(roll_deg);
 
@@ -28,11 +27,10 @@ function [hA, hB, hC] = prh_to_leg_heights(pitch_deg, roll_deg, h_new)
         0,           cos(roll),              sin(roll);
         sin(pitch), -sin(roll)*cos(pitch),   cos(roll)*cos(pitch)];
     
-    % New normal vector after pitch/roll
+    % New normal vector
     n = rotation_matrix * [0;0;1];
     n = n / norm(n);
-
-    % New triangle center in 3D space
+    
     center_new = h_new * n';
 
     % Find old corner vectors relative to the center
@@ -54,12 +52,12 @@ function [hA, hB, hC] = prh_to_leg_heights(pitch_deg, roll_deg, h_new)
         R_align = eye(3) + sin(theta)*K + (1-cos(theta))*K^2; % Rodrigues' formula
     end
 
-    % Calculate new corner positions in 3D
+    % Calculate new corner positions
     A1 = center_new + (R_align * A0c')';
     B1 = center_new + (R_align * B0c')';
     C1 = center_new + (R_align * C0c')';
 
-    % Leg heights are the Z components (distance from ground)
+    % Leg heights
     hA = A1(3);
     hB = B1(3);
     hC = C1(3);
