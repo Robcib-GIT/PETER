@@ -9,25 +9,24 @@ function [x, y, h_out] = prh_to_xyh(pitch_deg, roll_deg, h)
     %   y:         Y coordinate of center (mm)
     %   h_out:     Height (same as input h)
     
-    % Convert input angles from degrees to radians
     pitch = deg2rad(pitch_deg);
     roll  = deg2rad(roll_deg);
 
-    % Define the rotation matrix as in the original script
+    % Define the rotation matrix
     R = [ cos(pitch), sin(roll)*sin(pitch),  -cos(roll)*sin(pitch);
           0,          cos(roll),              sin(roll);
           sin(pitch), -sin(roll)*cos(pitch),  cos(roll)*cos(pitch) ];
 
-    % Initial normal vector (platform points upwards)
+    % Initial normal vector (upwards)
     n = [0; 0; 1];
 
-    % Apply the rotation to the normal vector
+    % Rotate the normal vector
     normal = R * n;
 
-    % Normalize the normal vector (just in case)
+    % Normalize 
     normal = normal / norm(normal);
 
-    % Swap and scale as per original script
+    % organize
     % x = normal(2), y = normal(1), z = normal(3)
     x = h * normal(2);
     y = h * normal(1);
