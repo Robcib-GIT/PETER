@@ -1,0 +1,69 @@
+function [x, y, z, h] = read_sensors_filtered(ser, verbose)
+
+
+    %This function prepared to prevent effects of big noises in TOF.
+
+
+    if nargin < 2
+        verbose = false;
+    end
+
+    % Kalman filter parameters 
+    persistent h_hat P Q R first_call
+    if isempty(first_call)
+        h_hat = 40;      
+        P = 0.25;         
+        Q = 0.01;       
+        R = 0.40;         
+        first_call = true;
+    end
+
+    writeline(ser, 'M');   
+    pause(0.05);           
+    raw_data = readline(ser);  
+    data = string(raw_data);   
+    data = strtrim(data);
+
+    if startsWith(data, "S")
+        data = strtrim(extractAfter(data,1));
+        nums = split(data, ",");
+        if numel(nums) == 4
+            try
+                x = str2double(nums(1));
+                y = str2double(nums(2));
+                z = str2double(nums(3));
+                h_raw = str2double(nums(4));
+
+                if first_call
+                    h_hat = h_raw;
+                    first_call = false;
+                end
+
+                h_pred = h_hat;
+                P = P + Q;
+
+                K = P / (P + R);
+                h_hat = h_pred + K * (h_raw - h_pred);
+                P = (1 - K) * P;
+
+                h = h_hat;
+
+            catch
+                if verbose
+                    disp("Conversion error: " + data)
+                end
+                x = NaN; y = NaN; z = NaN; h = NaN;
+            end
+        else
+            if verbose
+                disp("Format error: " + data)
+            end
+            x = NaN; y = NaN; z = NaN; h = NaN;
+        end
+    else
+        if verbose
+            disp("Format error: " + data)
+        end
+        x = NaN; y = NaN; z = NaN; h = NaN;
+    end
+end
