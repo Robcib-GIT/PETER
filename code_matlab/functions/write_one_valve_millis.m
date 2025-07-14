@@ -9,6 +9,6 @@ function write_one_valve_millis(ser, valv, millis)
         cmd = sprintf('e,%d,%d\n', valv, round(abs(millis))); % deflate
     end
 
-    pause(0.01); % Komutun iletilmesi için bekleme (Python kodunda da var)
-    writeline(ser, cmd); % veya fprintf(ser, cmd); eski serial için
+    pause(0.01); 
+    writeline(ser, cmd); 
 end
