@@ -3,8 +3,8 @@
 #include "Valvula.h"
 #include "Sensor.h"
 
-#define XSHUT_PIN_1 7
-#define XSHUT_PIN_2 6
+#define XSHUT_PIN_1 6
+#define XSHUT_PIN_2 7
 
 modes State = S_NORMAL;
 uint8_t real_robot = 1;
@@ -60,57 +60,59 @@ void setup() {
 
 void loop() {
   if (Serial.available() > 0) {
-    String input = Serial.readStringUntil('\n');  // Read full line until newline
-    input.trim(); // Remove whitespace or carriage return if any
+    char op = Serial.read();
 
-    if (input.length() > 0) {
-      char op = input.charAt(0);
-      uint8_t num_valv;
-      uint16_t x;
+    uint8_t num_valv;
+    uint16_t x;
 
-      switch (op) {
-        case 'i':
-          real_robot = input.substring(1).toInt();
-          Serial.println("Working mode changed");
-          break;
+    switch (op) {
+      case 'i':
+        real_robot = Serial.parseInt();
+        Serial.println("Working mode changed");
+        break;
 
-        case 'f':
-          sscanf(input.c_str() + 1, "%hhu %hu", &num_valv, &x);
-          misValvulas[num_valv]->fill_millis(x);
-          Serial.print("Filling valve ");
-          Serial.print(num_valv);
-          Serial.print(" for ");
-          Serial.print(x);
-          Serial.println(" ms");
-          break;
+      case 'f':
+        num_valv = Serial.parseInt();
+        x = Serial.parseInt();
+        misValvulas[num_valv]->fill_millis(x);
+        Serial.print("Filling valve ");
+        Serial.print(num_valv);
+        Serial.print(" for ");
+        Serial.print(x);
+        Serial.println(" ms");
+        break;
 
-        case 'e':
-          sscanf(input.c_str() + 1, "%hhu %hu", &num_valv, &x);
-          misValvulas[num_valv]->emptyng_millis(x);
-          Serial.print("Emptying valve ");
-          Serial.print(num_valv);
-          Serial.print(" for ");
-          Serial.print(x);
-          Serial.println(" ms");
-          break;
+      case 'e':
+        num_valv = Serial.parseInt();
+        x = Serial.parseInt();
+        misValvulas[num_valv]->emptyng_millis(x);
+        Serial.print("Emptying valve ");
+        Serial.print(num_valv);
+        Serial.print(" for ");
+        Serial.print(x);
+        Serial.println(" ms");
+        break;
 
-        case 'c':
-          num_valv = input.substring(1).toInt();
-          misValvulas[num_valv]->Cerrada();
-          Serial.print("Valve ");
-          Serial.print(num_valv);
-          Serial.println(" closed");
-          break;
+      case 'c':
+        num_valv = Serial.parseInt();
+        misValvulas[num_valv]->Cerrada();
+        Serial.print("Valve ");
+        Serial.print(num_valv);
+        Serial.println(" closed");
+        break;
 
-        case 'M':
-          if (real_robot) {
-            Serial.print("S ");
-            for (uint8_t i = 0; i < NUM_SENSORES; i++) {
-              misSensores[i]->measure();
-            }
-            Serial.println();
+      case 'M': {
+        String input = Serial.readStringUntil('\n');
+        input.trim();
+
+        if (real_robot) {
+          Serial.print("S ");
+          for (uint8_t i = 0; i < NUM_SENSORES; i++) {
+            misSensores[i]->measure();
           }
-          break;
+          Serial.println();
+        }
+        break;
       }
     }
   }
