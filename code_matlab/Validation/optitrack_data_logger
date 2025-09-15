@@ -1,0 +1,70 @@
+import time
+import csv
+import math
+from natnet_wrapper import NatNetClient
+
+# Rigid Body adı
+rigid_body_name = "PETER"
+output_file = "optitrack_logger.csv"
+
+# Global değişkenler    
+rigid_body_data = {
+    'x': None,
+    'y': None,
+    'z': None,
+    'qx': None,
+    'qy': None,
+    'qz': None,
+    'qw': None
+}
+
+
+def quaternion_to_euler_pitch_roll(qx, qy, qz, qw):
+    sinp = 2.0 * (qw * qy - qz * qx)
+    pitch = math.degrees(math.asin(max(-1.0, min(1.0, sinp))))
+    
+    sinr_cosp = 2.0 * (qw * qx + qy * qz)
+    cosr_cosp = 1.0 - 2.0 * (qx * qx + qy * qy)
+    roll = math.degrees(math.atan2(sinr_cosp, cosr_cosp))
+    
+    return pitch, roll
+
+def receive_rigid_body_frame(id, position, rotation):
+    global rigid_body_data
+    if id == 1:  # IMPORTANT
+        rigid_body_data['x'], rigid_body_data['y'], rigid_body_data['z'] = position
+        rigid_body_data['qx'], rigid_body_data['qy'], rigid_body_data['qz'], rigid_body_data['qw'] = rotation
+
+
+streaming_client = NatNetClient(
+    server_ip="169.254.163.34",  
+    local_ip="169.254.163.10"     
+)
+
+streaming_client.newFrameListener = None
+streaming_client.rigidBodyListener = receive_rigid_body_frame
+
+# CSV dosyasını hazırla
+with open(output_file, mode='w', newline='') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(['timestamp', 'x', 'y', 'z', 'pitch', 'roll'])
+
+    try:
+        streaming_client.run()
+        print(f"[INFO] Logging started. Saving to '{output_file}'...")
+
+        while True:
+            if all(v is not None for v in rigid_body_data.values()):
+                timestamp = time.time()
+                x, y, z = rigid_body_data['x'], rigid_body_data['y'], rigid_body_data['z']
+                qx, qy, qz, qw = rigid_body_data['qx'], rigid_body_data['qy'], rigid_body_data['qz'], rigid_body_data['qw']
+                pitch, roll = quaternion_to_euler_pitch_roll(qx, qy, qz, qw)
+
+                print(f"[{timestamp:.2f}] x: {x:.2f}, y: {y:.2f}, pitch: {pitch:.2f}, roll: {roll:.2f}")
+                writer.writerow([timestamp, x, y, z, pitch, roll])
+
+            time.sleep(0.01)
+
+    except KeyboardInterrupt:
+        print("[INFO] Logging stopped by user.")
+        streaming_client.shutdown()
