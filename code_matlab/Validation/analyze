@@ -1,0 +1,59 @@
+clear; clc; close all
+
+% This script compares estimated platform center positions (x, y) based on pitch and roll
+% against real-world motion capture data, using the prh_to_xyh model for validation.
+% Only data from the 90th sample onward is analyzed.
+
+% Load the recorded data (X, Y, Z, Pitch, Roll from IMU and tracking system)
+data = readtable('optitrack_test_data_1.csv');
+data = table2array(data);    
+
+X_real = data(:,1);
+Y_real = data(:,2);
+Z_real = data(:,3);
+Pitch  = data(:,4);
+Roll   = data(:,5);
+
+% Use only data after the 90th sample
+start_idx = 1;
+X_real = X_real(start_idx:end);
+Y_real = Y_real(start_idx:end);
+Z_real = Z_real(start_idx:end);
+Pitch  = Pitch(start_idx:end);
+Roll   = Roll(start_idx:end);
+
+% Reference: assume flat platform at first sample
+z0 = Z_real(1);
+h0 = 108;  % Reference platform height in mm
+
+% Number of samples after slicing
+N = length(Pitch);
+
+% Initialize estimated values
+x_est = zeros(N,1);
+y_est = zeros(N,1);
+
+for i = 1:N
+    % Normalize height based on first Z reading
+    h_norm = h0 * (Z_real(i) / z0);
+
+    % Estimate X, Y from pitch-roll-height
+    [x_est(i), y_est(i), ~] = prh_to_xyh(Pitch(i), Roll(i), h_norm);
+end
+
+X_meas_norm = X_real - X_real(1);
+Y_meas_norm = Y_real - Y_real(1);
+
+figure;
+subplot(2,1,1);
+plot(x_est, 'r'); hold on; plot(X_meas_norm, 'b');
+title('X Position: Estimated vs Measured'); legend('Estimated','Measured');
+xlabel('Sample Index'); ylabel('X [mm]');
+grid on;
+
+subplot(2,1,2);
+plot(y_est, 'r'); hold on; plot(Y_meas_norm, 'b');
+title('Y Position: Estimated vs Measured'); legend('Estimated','Measured');
+xlabel('Sample Index'); ylabel('Y [mm]');
+grid on;
+
