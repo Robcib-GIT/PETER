@@ -9,36 +9,40 @@ modes State = S_NORMAL;
 uint8_t real_robot = 1;
 Sensor *misSensores[NUM_SENSORES];
 
-bool autoSerial = false;
+bool autoSerial = true;
 
 void setup() {
   Serial.begin(115200);
 
   Wire.begin();
   Wire.setClock(100000);
+  Wire.setWireTimeout(3000, true); // <-- AÑADIR: Resetea el bus si se cuelga más de 3ms
 
   pinMode(EMRGY_PIN, INPUT_PULLUP);
+  // 1. Apagar AMBOS ToF
   pinMode(XSHUT_PIN_1, OUTPUT);
   pinMode(XSHUT_PIN_2, OUTPUT);
   digitalWrite(XSHUT_PIN_1, LOW);
   digitalWrite(XSHUT_PIN_2, LOW);
-  delay(10);
+  delay(100); // Pausa para asegurar que se reinicien del todo
 
+  // Instanciar objetos
   misSensores[0] = new SensorBNO055();
-  delay(500);
   misSensores[1] = new SensorVL53L0X();
   misSensores[2] = new SensorBNO055_alt();
-  delay(500);
   misSensores[3] = new SensorVL53L0X_alt();
 
+  // 2. Encender e inicializar el PRIMER ToF (0x30)
   digitalWrite(XSHUT_PIN_1, HIGH);
-  delay(10);
+  delay(200);
   ((SensorVL53L0X*)misSensores[1])->begin();
 
+  // 3. Encender e inicializar el SEGUNDO ToF (0x31)
   digitalWrite(XSHUT_PIN_2, HIGH);
-  delay(10);
+  delay(200);
   ((SensorVL53L0X_alt*)misSensores[3])->begin();
 
+  // 4. Inicializar IMUs
   misSensores[0]->begin();
   misSensores[2]->begin();
 
@@ -100,5 +104,5 @@ void loop() {
     digitalWrite(13, !digitalRead(13));
     delay(100);
   }
-  delay(5);
+  delay(50);
 }

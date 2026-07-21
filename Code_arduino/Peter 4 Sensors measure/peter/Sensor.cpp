@@ -21,7 +21,7 @@ void SensorBNO055::measure() {
     Serial.print(",");
     Serial.print(orientationData.orientation.z);
     Serial.print(",");
-    delay(5); // Added delay IMPORTANT
+    //delay(5); // Added delay IMPORTANT
 }
 
 SensorVL53L0X::SensorVL53L0X() : Sensor() {}
@@ -36,9 +36,12 @@ void SensorVL53L0X::begin() {
 void SensorVL53L0X::measure() {
     VL53L0X_RangingMeasurementData_t measure;
     lox.rangingTest(&measure, false);
-    Serial.print(measure.RangeMilliMeter);
+    if (measure.RangeStatus != 4) {
+        Serial.print(measure.RangeMilliMeter);
+    } else {
+        Serial.print("-1");
+    }
     Serial.print(",");
-    delay(5);
 }
 
 SensorBNO055_alt::SensorBNO055_alt() : Sensor() {}
@@ -59,7 +62,6 @@ void SensorBNO055_alt::measure() {
     Serial.print(",");
     Serial.print(orientationData.orientation.z);
     Serial.print(",");
-    delay(5);
 }
 
 SensorVL53L0X_alt::SensorVL53L0X_alt() : Sensor() {}
@@ -74,7 +76,10 @@ void SensorVL53L0X_alt::begin() {
 void SensorVL53L0X_alt::measure() {
     VL53L0X_RangingMeasurementData_t measure;
     lox.rangingTest(&measure, false);
-    Serial.print(measure.RangeMilliMeter);
+    if (measure.RangeStatus != 4) {
+        Serial.print(measure.RangeMilliMeter);
+    } else {
+        Serial.print("-1");
+    }
     Serial.print(",");
-    delay(5);
 }
