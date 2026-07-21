@@ -45,13 +45,13 @@ X_meas_norm = X_real - X_real(1);
 Y_meas_norm = Y_real - Y_real(1);
 
 figure;
-subplot(2,1,1);
+subplot(1,2,1);
 plot(x_est, 'r'); hold on; plot(X_meas_norm, 'b');
 title('X Position: Estimated vs Measured'); legend('Estimated','Measured');
 xlabel('Sample Index'); ylabel('X [mm]');
 grid on;
 
-subplot(2,1,2);
+subplot(1,2,2);
 plot(y_est, 'r'); hold on; plot(Y_meas_norm, 'b');
 title('Y Position: Estimated vs Measured'); legend('Estimated','Measured');
 xlabel('Sample Index'); ylabel('Y [mm]');
